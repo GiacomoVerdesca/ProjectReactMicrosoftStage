@@ -9,8 +9,8 @@ import "regenerator-runtime/runtime";
 
 export const AuthComponent = (props) => {
   const [error, setError] = useState(null);
-  // const [isAuthenticated, setIsAuthenticated] = useState();
-  // const [user, setUser] = useState();
+  const [isAuthenticated, setIsAuthenticated] = useState();
+  const [user, setUser] = useState();
   const [token, setToken] = useState();
   //istanza per la gestione degli errori tramite MSAL 
   const interactionRequiredAuthError = new InteractionRequiredAuthError();
@@ -29,11 +29,17 @@ export const AuthComponent = (props) => {
   var graph = require('@microsoft/microsoft-graph-client');
 
   useEffect(() => {
-    console.log('autenticazione sessione: ', sessionStorage.getItem("autenticazione"));
+    const utente = JSON.parse(sessionStorage.getItem('graphUser'));
+    sessionStorage.getItem("graphUser") ? setUser(preuser => preuser = utente) : null;
+    console.log('USER STATE: ', user);
+    sessionStorage.getItem("autenticazione") ? setIsAuthenticated(preautenticazione => preautenticazione = sessionStorage.getItem("autenticazione")) : null;
+    console.log('AUTENTICAZIONE STATE: ', isAuthenticated);
+    sessionStorage.getItem("token") ? setToken(pretoken => pretoken = sessionStorage.getItem("token")) : null;
     console.log('Tokennn=====>', token)
-  });
+  }, [isAuthenticated]);
 
   //MSAL
+
   const logIn = async () => {
     try {
       const authResult = await publicClientApplication.loginPopup(
@@ -41,13 +47,15 @@ export const AuthComponent = (props) => {
       );
       sessionStorage.setItem("autenticazione", true);
       sessionStorage.setItem("msalAccount", authResult.account.username);
-      const user = await getUser();
-      sessionStorage.setItem('graphUser', JSON.stringify(user));
+      const User = await getUser();
+      sessionStorage.setItem('graphUser', JSON.stringify(User));
     } catch (err) {
+      sessionStorage.setItem("autenticazione", false);
       setIsAuthenticated((preIsAuthenticated) => (preIsAuthenticated = false));
       setError((preError) => (preError = err));
       console.log(error)
     }
+    window.location.href = window.location.href
   };
 
   const logOut = () => {
@@ -62,7 +70,7 @@ export const AuthComponent = (props) => {
     let account = sessionStorage.getItem("msalAccount");
     if (!account) {
       throw new Error(
-        "L' account dell' utente manca nel sessioneStorage. Perfavore sloggati e loggati ntorna."
+        "L'account dell' utente manca nel sessioneStorage. Perfavore sloggati e loggati ntorna."
       );
     }
 
@@ -75,7 +83,6 @@ export const AuthComponent = (props) => {
         silentRequest
       );
       sessionStorage.setItem('token', silentResult.accessToken);
-      setToken(preToken => preToken = silentResult.accessToken);
       return silentResult.accessToken;
     } catch (silentError) {
       if (interactionRequiredAuthError) {
@@ -109,9 +116,10 @@ export const AuthComponent = (props) => {
 
   return (
     <div>
-      {sessionStorage.getItem("autenticazione") ? (
+      {isAuthenticated ? (
         <div>
-          <p>Sei connesso</p>
+          <p>Benvenuto {user.displayName}</p>
+          <p>SEI CONNESSO.</p>
           <button onClick={logOut}>LogOut</button>
         </div>
       ) : (
