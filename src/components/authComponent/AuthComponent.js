@@ -26,7 +26,6 @@ export const AuthComponent = () => {
 
   useEffect(() => { });
 
-  //login function for authentication
   const logIn = async () => {
     try {
       const authResult = await publicClientApplication.loginPopup(
@@ -42,7 +41,7 @@ export const AuthComponent = () => {
 
   const logOut = () => {
     publicClientApplication.logout();
-    setToken(preToken => preToken = null);
+    sessionStorage.removeItem('token');
   };
 
   //token
@@ -55,7 +54,6 @@ export const AuthComponent = () => {
     }
 
     try {
-      // First, attempt to get the token silently
       const silentRequest = {
         scopes: config.scopes,
         account: publicClientApplication.getAccountByUsername(account),
@@ -67,8 +65,6 @@ export const AuthComponent = () => {
       setToken(preToken => preToken = silentResult.accessToken);
       // return silentResult.accessToken;
     } catch (silentError) {
-      // If silent requests fails with InteractionRequiredAuthError,
-      // attempt to get the token interactively
       if (interactionRequiredAuthError) {
         const interactiveResult = await publicClientApplication.acquireTokenPopup(
           config.scopes
@@ -81,7 +77,7 @@ export const AuthComponent = () => {
   };
 
   console.log('Tokennn=====>', token)
-  
+
   return (
     <div>
       {isAuthenticated ? (
