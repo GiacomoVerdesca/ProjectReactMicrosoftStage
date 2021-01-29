@@ -7,12 +7,14 @@ import {
 //import "core-js/stable";
 import "regenerator-runtime/runtime";
 
-export const AuthComponent = () => {
+export const AuthComponent = (props) => {
   const [error, setError] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState({});
+  // const [isAuthenticated, setIsAuthenticated] = useState();
+  // const [user, setUser] = useState();
   const [token, setToken] = useState();
+  //istanza per la gestione degli errori tramite MSAL 
   const interactionRequiredAuthError = new InteractionRequiredAuthError();
+  //istanza per l' Autenticazione tramite MSAL
   const publicClientApplication = new PublicClientApplication({
     auth: {
       clientId: config.appId,
@@ -23,25 +25,36 @@ export const AuthComponent = () => {
       storeAuthStateInCookie: true,
     },
   });
+  //Recupero MicrosoftGraph per le chiamate API
+  var graph = require('@microsoft/microsoft-graph-client');
 
-  useEffect(() => { });
+  useEffect(() => {
+    console.log('autenticazione sessione: ', sessionStorage.getItem("autenticazione"));
+    console.log('Tokennn=====>', token)
+  });
 
+  //MSAL
   const logIn = async () => {
     try {
       const authResult = await publicClientApplication.loginPopup(
         config.scopes
       );
-      setIsAuthenticated((preIsAuthenticated) => (preIsAuthenticated = true));
+      sessionStorage.setItem("autenticazione", true);
       sessionStorage.setItem("msalAccount", authResult.account.username);
+      const user = await getUser();
+      sessionStorage.setItem('graphUser', JSON.stringify(user));
     } catch (err) {
       setIsAuthenticated((preIsAuthenticated) => (preIsAuthenticated = false));
       setError((preError) => (preError = err));
+      console.log(error)
     }
   };
 
   const logOut = () => {
     publicClientApplication.logout();
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('autenticazione');
+    sessionStorage.removeItem('graphUser');
   };
 
   //token
@@ -49,7 +62,7 @@ export const AuthComponent = () => {
     let account = sessionStorage.getItem("msalAccount");
     if (!account) {
       throw new Error(
-        "User account missing from session. Please sign out and sign in again."
+        "L' account dell' utente manca nel sessioneStorage. Perfavore sloggati e loggati ntorna."
       );
     }
 
@@ -63,7 +76,7 @@ export const AuthComponent = () => {
       );
       sessionStorage.setItem('token', silentResult.accessToken);
       setToken(preToken => preToken = silentResult.accessToken);
-      // return silentResult.accessToken;
+      return silentResult.accessToken;
     } catch (silentError) {
       if (interactionRequiredAuthError) {
         const interactiveResult = await publicClientApplication.acquireTokenPopup(
@@ -76,16 +89,35 @@ export const AuthComponent = () => {
     }
   };
 
-  console.log('Tokennn=====>', token)
+  //GRAPH
+  const authProvider = {
+    getAccessToken: async () => {
+      // Call getToken in auth.js
+      return await getToken();
+    }
+  };
+  const graphClient = graph.Client.initWithMiddleware({ authProvider });
+
+  const getUser = async () => {
+    return await graphClient
+      .api('/me')
+      // Only get the fields used by the app
+      .select('id,displayName,mail,userPrincipalName,mailboxSettings')
+      .get();
+  }
+
 
   return (
     <div>
-      {isAuthenticated ? (
-        <p>Sei connesso</p>
+      {sessionStorage.getItem("autenticazione") ? (
+        <div>
+          <p>Sei connesso</p>
+          <button onClick={logOut}>LogOut</button>
+        </div>
       ) : (
           <button onClick={logIn}>Login</button>
         )}
-      {isAuthenticated && <div><button onClick={logOut}>LogOut</button> <button onClick={getToken}>GetTOKEN</button></div>}
+
     </div>
   );
 };
