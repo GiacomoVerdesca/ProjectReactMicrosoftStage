@@ -79,7 +79,9 @@ export const AuthComponent = () => {
       }
     }
   };
-console.log('Tokennn=====>',token)
+
+  console.log('Tokennn=====>', token)
+  
   return (
     <div>
       {isAuthenticated ? (
@@ -87,7 +89,7 @@ console.log('Tokennn=====>',token)
       ) : (
           <button onClick={logIn}>Login</button>
         )}
-      {isAuthenticated && <div><button onClick={logOut}>LogOut</button> <button onClick={getToken}>GegetttOKEN</button></div>}
+      {isAuthenticated && <div><button onClick={logOut}>LogOut</button> <button onClick={getToken}>GetTOKEN</button></div>}
     </div>
   );
 };
