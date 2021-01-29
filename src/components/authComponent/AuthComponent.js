@@ -35,7 +35,7 @@ export const AuthComponent = (props) => {
     sessionStorage.getItem("autenticazione") ? setIsAuthenticated(preautenticazione => preautenticazione = sessionStorage.getItem("autenticazione")) : null;
     console.log('AUTENTICAZIONE STATE: ', isAuthenticated);
     sessionStorage.getItem("token") ? setToken(pretoken => pretoken = sessionStorage.getItem("token")) : null;
-    console.log('Tokennn=====>', token)
+    console.log('Tokennn=====>', token);
   }, [isAuthenticated]);
 
   //MSAL
@@ -113,19 +113,17 @@ export const AuthComponent = (props) => {
       .get();
   }
 
-
   return (
-    <div>
+    <span>
       {isAuthenticated ? (
-        <div>
-          <p>Benvenuto {user.displayName}</p>
-          <p>SEI CONNESSO.</p>
-          <button onClick={logOut}>LogOut</button>
-        </div>
+        <span>
+          <span style={{ marginRight: '35px', color: 'white', fontSize: '20px' }}>Benvenuto {user.displayName}.</span>
+          <button className='btn btn-danger' onClick={logOut}>LogOut</button>
+        </span>
       ) : (
-          <button onClick={logIn}>Login</button>
+          <button className='btn btn-warning' onClick={logIn}>Login</button>
         )}
-
-    </div>
+    </span>
   );
 };
+
