@@ -11,6 +11,7 @@ export const AuthComponent = () => {
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState({});
+  const [token, setToken] = useState();
   const interactionRequiredAuthError = new InteractionRequiredAuthError();
   const publicClientApplication = new PublicClientApplication({
     auth: {
@@ -23,7 +24,7 @@ export const AuthComponent = () => {
     },
   });
 
-  useEffect(() => {});
+  useEffect(() => { });
 
   //login function for authentication
   const logIn = async () => {
@@ -41,7 +42,7 @@ export const AuthComponent = () => {
 
   const logOut = () => {
     publicClientApplication.logout();
-    
+    setToken(preToken => preToken = null);
   };
 
   //token
@@ -62,9 +63,9 @@ export const AuthComponent = () => {
       const silentResult = await publicClientApplication.acquireTokenSilent(
         silentRequest
       );
-      console.log(silentResult.accessToken);
-      
-      return silentResult.accessToken;
+      sessionStorage.setItem('token', silentResult.accessToken);
+      setToken(preToken => preToken = silentResult.accessToken);
+      // return silentResult.accessToken;
     } catch (silentError) {
       // If silent requests fails with InteractionRequiredAuthError,
       // attempt to get the token interactively
@@ -78,14 +79,14 @@ export const AuthComponent = () => {
       }
     }
   };
-
+console.log('Tokennn=====>',token)
   return (
     <div>
       {isAuthenticated ? (
         <p>Sei connesso</p>
       ) : (
-        <button onClick={logIn}>Login</button>
-      )}
+          <button onClick={logIn}>Login</button>
+        )}
       {isAuthenticated && <div><button onClick={logOut}>LogOut</button> <button onClick={getToken}>GegetttOKEN</button></div>}
     </div>
   );
