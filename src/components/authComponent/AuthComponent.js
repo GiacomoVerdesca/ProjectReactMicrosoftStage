@@ -6,6 +6,7 @@ import {
 } from "@azure/msal-browser";
 //import "core-js/stable";
 import "regenerator-runtime/runtime";
+// import { GraphService } from '../../service/GraphService';
 
 export const AuthComponent = (props) => {
   const [error, setError] = useState(null);
@@ -27,6 +28,7 @@ export const AuthComponent = (props) => {
   });
   //Recupero MicrosoftGraph per le chiamate API
   var graph = require('@microsoft/microsoft-graph-client');
+  // let graphService = new GraphService.getInstance();
 
   useEffect(() => {
     const utente = JSON.parse(sessionStorage.getItem('graphUser'));
@@ -97,6 +99,8 @@ export const AuthComponent = (props) => {
   };
 
   //GRAPH
+  // graphService.getUser();
+
   const authProvider = {
     getAccessToken: async () => {
       // Call getToken in auth.js
@@ -115,7 +119,7 @@ export const AuthComponent = (props) => {
 
   return (
     <span>
-      {isAuthenticated ? (
+      {user && isAuthenticated ? (
         <span>
           <span style={{ marginRight: '35px', color: 'white', fontSize: '20px' }}>Benvenuto {user.displayName}.</span>
           <button className='btn btn-danger' onClick={logOut}>LogOut</button>
