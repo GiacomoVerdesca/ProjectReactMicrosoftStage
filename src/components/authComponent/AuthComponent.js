@@ -32,11 +32,11 @@ export const AuthComponent = (props) => {
 
   useEffect(() => {
     const utente = JSON.parse(sessionStorage.getItem('graphUser'));
-    sessionStorage.getItem("graphUser") ? setUser(preuser => preuser = utente) : null;
+    sessionStorage.getItem("graphUser") ? setUser(utente) : null;
     console.log('USER STATE: ', user);
-    sessionStorage.getItem("autenticazione") ? setIsAuthenticated(preautenticazione => preautenticazione = sessionStorage.getItem("autenticazione")) : null;
+    sessionStorage.getItem("autenticazione") ? setIsAuthenticated(sessionStorage.getItem("autenticazione")) : null;
     console.log('AUTENTICAZIONE STATE: ', isAuthenticated);
-    sessionStorage.getItem("token") ? setToken(pretoken => pretoken = sessionStorage.getItem("token")) : null;
+    sessionStorage.getItem("token") ? setToken(sessionStorage.getItem("token")) : null;
     console.log('Tokennn=====>', token);
   }, [isAuthenticated]);
 
@@ -53,8 +53,8 @@ export const AuthComponent = (props) => {
       sessionStorage.setItem('graphUser', JSON.stringify(User));
     } catch (err) {
       sessionStorage.setItem("autenticazione", false);
-      setIsAuthenticated((preIsAuthenticated) => (preIsAuthenticated = false));
-      setError((preError) => (preError = err));
+      setIsAuthenticated(false);
+      setError(err);
       console.log(error)
     }
     window.location.href = window.location.href
@@ -116,6 +116,7 @@ export const AuthComponent = (props) => {
       .select('id,displayName,mail,userPrincipalName,mailboxSettings')
       .get();
   }
+
 
   return (
     <span>
