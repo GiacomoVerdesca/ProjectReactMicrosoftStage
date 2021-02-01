@@ -99,7 +99,7 @@ export const AuthComponent = (props) => {
   };
 
   //GRAPH
-  // graphService.getUser();
+   //graphService.getUser();
 
   const authProvider = {
     getAccessToken: async () => {
@@ -131,4 +131,3 @@ export const AuthComponent = (props) => {
     </span>
   );
 };
-
