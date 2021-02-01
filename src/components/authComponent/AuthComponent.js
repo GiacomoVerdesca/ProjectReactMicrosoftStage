@@ -6,6 +6,7 @@ import {
 } from "@azure/msal-browser";
 //import "core-js/stable";
 import "regenerator-runtime/runtime";
+// import { GraphService } from '../../service/GraphService';
 
 export const AuthComponent = (props) => {
   const [error, setError] = useState(null);
@@ -25,9 +26,14 @@ export const AuthComponent = (props) => {
       storeAuthStateInCookie: true,
     },
   });
- 
+  //Recupero MicrosoftGraph per le chiamate API
+  var graph = require('@microsoft/microsoft-graph-client');
+  // let graphService = new GraphService.getInstance();
 
   useEffect(() => {
+    const utente = JSON.parse(sessionStorage.getItem('graphUser'));
+    sessionStorage.getItem("graphUser") ? setUser(utente) : null;
+    console.log('USER STATE: ', user);
     sessionStorage.getItem("autenticazione") ? setIsAuthenticated(sessionStorage.getItem("autenticazione")) : null;
     console.log('AUTENTICAZIONE STATE: ', isAuthenticated);
     sessionStorage.getItem("token") ? setToken(sessionStorage.getItem("token")) : null;
@@ -43,6 +49,8 @@ export const AuthComponent = (props) => {
       );
       sessionStorage.setItem("autenticazione", true);
       sessionStorage.setItem("msalAccount", authResult.account.username);
+      const User = await getUser();
+      sessionStorage.setItem('graphUser', JSON.stringify(User));
     } catch (err) {
       sessionStorage.setItem("autenticazione", false);
       setIsAuthenticated(false);
@@ -56,6 +64,7 @@ export const AuthComponent = (props) => {
     publicClientApplication.logout();
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('autenticazione');
+    sessionStorage.removeItem('graphUser');
   };
 
   //token
@@ -88,6 +97,25 @@ export const AuthComponent = (props) => {
       }
     }
   };
+
+  //GRAPH
+  // graphService.getUser();
+
+  const authProvider = {
+    getAccessToken: async () => {
+      // Call getToken in auth.js
+      return await getToken();
+    }
+  };
+  const graphClient = graph.Client.initWithMiddleware({ authProvider });
+
+  const getUser = async () => {
+    return await graphClient
+      .api('/me')
+      // Only get the fields used by the app
+      .select('id,displayName,mail,userPrincipalName,mailboxSettings')
+      .get();
+  }
 
 
   return (
