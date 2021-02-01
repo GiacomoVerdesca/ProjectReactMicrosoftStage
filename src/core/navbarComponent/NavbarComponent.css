@@ -1,0 +1,9 @@
+.myNavbar {
+  background-color:  #2255ee;
+}
+h3{
+  color:white;
+}
+h3:hover{
+  font-weight: bold;
+}
